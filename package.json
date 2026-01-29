@@ -1,0 +1,23 @@
+{
+  "name": "copilot-skills-cli",
+  "version": "1.0.0",
+  "description": "Mini AI agent to load skills.sh skills into VS Code for Copilot",
+  "bin": {
+    "copilot-skills": "./bin/cli.js"
+  },
+  "scripts": {
+    "copilot-skills": "node ./bin/cli.js"
+  },
+  "keywords": [
+    "copilot",
+    "skills",
+    "cli",
+    "ai"
+  ],
+  "author": "karo.dev",
+  "dependencies": {
+    "fs": "^0.0.2",
+    "path": "^0.12.7",
+    "inquirer": "^9.2.7"
+  }
+}
