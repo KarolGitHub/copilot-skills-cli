@@ -1,8 +1,14 @@
 #!/usr/bin/env node
-const fs = require('fs');
-const path = require('path');
-const inquirer = require('inquirer');
-const { exec } = require('child_process');
+import fs from 'fs';
+import path from 'path';
+import inquirer from 'inquirer';
+import clipboard from 'clipboardy';
+import { exec } from 'child_process';
+import { fileURLToPath } from 'url';
+import os from 'os';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Detect current project skills
 const skillsDir = fs.existsSync(path.join(process.cwd(), '.skills'))
@@ -76,26 +82,27 @@ inquirer
       choices,
     },
   ])
-  .then((answer) => {
+  .then(async (answer) => {
     const skill = skills.find((s) => s.name === answer.selectedSkill);
-    if (!skill) return console.log('Skill not found.');
+    if (!skill) {
+      console.log('Skill not found.');
+      return;
+    }
 
-    const skillContent = skill.content.replace(/^keywords:.*\n/, ''); // remove keywords line
+    const skillContent = skill.content.replace(/^keywords:.*\n/, '');
 
-    // Copy to clipboard
-    const platform = process.platform;
-    let cmd;
-    if (platform === 'darwin')
-      cmd = `echo "${skillContent.replace(/"/g, '\\"')}" | pbcopy`;
-    else if (platform === 'win32') cmd = `echo ${skillContent} | clip`;
-    else
-      cmd = `echo "${skillContent.replace(/"/g, '\\"')}" | xclip -selection clipboard`;
-
-    exec(cmd, (err) => {
-      if (err) console.log('Failed to copy to clipboard:', err);
-      else
-        console.log(
-          `Skill "${skill.name}" copied to clipboard! Paste into VS Code for Copilot.`,
-        );
-    });
+    // ✅ Reliable clipboard copy with clipboardy
+    try {
+      await clipboard.write(skillContent);
+      console.log(
+        `✅ "${skill.name}" copied to clipboard! Paste into VS Code for Copilot.`,
+      );
+    } catch (err) {
+      console.error('❌ Clipboard failed:', err.message);
+      // Fallback: print to console
+      console.log('\n--- SKILL CONTENT ---\n' + skillContent + '\n--- END ---');
+    }
+  })
+  .catch((err) => {
+    console.error('Prompt failed:', err);
   });
